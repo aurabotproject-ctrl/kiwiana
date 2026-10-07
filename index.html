@@ -3,6 +3,7 @@
 <title>Exit Ticket: The Classroom Engine</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="js/vendor/qrcode.js" onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';document.head.appendChild(s)"></script>
 <link rel="stylesheet" href="css/app.css">
 <style>
 :root{--cream:#FBE8D8;--cyan:#00B4D0;--pink:#FF6FA5;--ink:#1a1a1a;--paper:#fff7ef}
@@ -107,6 +108,7 @@ footer{background:var(--ink);color:var(--cream);padding:26px 0;margin-top:40px}
 
 <section id="lobby" class="view"><div class="panel pg"><div class="bar" id="lbar">Lobby</div><div class="in">
  <p style="margin:0;text-align:center">Students go to <b id="jl"></b> and enter</p><div class="code" id="rc">----</div>
+ <div class="qrw" id="qrw" hidden><canvas id="qr" role="img" aria-label="QR code that opens the join page"></canvas><small>Scan with a camera, or type the code</small></div>
  <div class="players" id="pl" aria-live="polite"></div><div class="msg" id="lmsg"></div>
  <div><button class="btn" id="start">Start game</button></div></div></div></section>
 
@@ -145,4 +147,4 @@ $('#jb').onclick=()=>{const c=$('#jc').value.trim().toUpperCase(),n=$('#jn').val
   k.on('open',()=>k.send({t:'join',name:n}));k.on('data',d=>{if(d.t==='ok'){m.className='msg ok';m.textContent=`You're in, ${n}. Watch the main screen.`}});
   setTimeout(()=>{if(!m.classList.contains('ok')){m.className='msg bad';m.textContent='No lobby found for that code. Check it and try again.'}},6000)});p.on('error',()=>{m.className='msg bad';m.textContent='Could not connect. Check the code and try again.'})};
 const q=new URLSearchParams(location.search).get('join');if(q){$('#jc').value=q;go('join')}
-</script><script src="js/fx.js"></script><script src="js/waka.js"></script><script src="js/auction.js"></script><script src="js/saboteur.js"></script><script src="js/dashboard.js"></script><script src="js/report.js"></script></body></html>
+</script><script src="js/fx.js"></script><script src="js/waka.js"></script><script src="js/auction.js"></script><script src="js/saboteur.js"></script><script src="js/dashboard.js"></script><script src="js/report.js"></script><script src="js/room.js"></script></body></html>

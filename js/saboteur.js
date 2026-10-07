@@ -84,7 +84,7 @@ function deal(){const G=g(),sb=G.sb;if(G.phase!=='intro')return;const ps=ACT();
  let n=Math.round(ps.length/8);n=ps.length>=10?Math.max(2,n):Math.max(1,n);n=Math.min(3,n,ps.length-2);
  const sabs=SH(ps).slice(0,n);sb.nSab=n;
  P().forEach(p=>{p.role=sabs.includes(p)?'saboteur':'builder';p.ready=!!p.bot;p.ej=false;p.acc=false;p.pts=0;p.streak=0});
- G.phase='roles';ACT().forEach(p=>send(p,roleMsg(p,true)));top();
+ G.phase='roles';ET.cp('build');ACT().forEach(p=>send(p,roleMsg(p,true)));top();
  $('#sbmain').innerHTML=panel('Roles dealt',`<div class="big">🤫 Check your device! There ${n>1?'are':'is'} <b>${n}</b> ${n>1?W().sabs:W().sab} among you.</div>
   <div class="big" id="cnt" aria-live="polite"></div><div class="bar2"><div id="cbar" style="width:0"></div></div>
   <p style="font-size:22px;margin:0">Hold the button on your device to peek at your secret role. Keep it to yourself!</p>${ctl('<button class="btn k" onclick="SB.build()">Start building</button>')}`);upd();beep(220,.15,'square')}
@@ -100,7 +100,7 @@ const vresMsg=p=>{const sb=g().sb,vr=sb.vr;return{t:'sb_vres',rows:vr.rows,skip:
 const endMsg=p=>{const sb=g().sb;return{t:'sb_end',w:sb.win,why:sb.why,role:p.role,ej:!!(p.role==='saboteur'&&p.ej),acc:!!p.acc,pts:p.pts||0,th:sb.theme,sabs:P().filter(x=>x.role==='saboteur').map(x=>({name:x.name,av:x.av}))}};
 
 /* a student (re)joins, or a late joiner arrives: give them the current screen. Late joiners play as builders. */
-function join(p){ensure(p);const G=g();if(G.phase==='lobby')return;const ph=G.phase;
+function join(p){ensure(p);const G=g();if(G.phase==='lobby'&&!G.rs)return;const ph=G.phase;
  if(ph==='intro')send(p,{t:'sb_intro',th:G.sb.theme});
  else{if(!p.role){p.role='builder';p.pts=p.pts||0}
   send(p,roleMsg(p,ph==='roles'));
@@ -166,7 +166,7 @@ function check(){const G=g(),sb=G.sb;if(sb.secs.filter(s=>s.failed).length>sb.se
  if(sabs.length&&!live.length)return{w:'builders',why:'caught'};
  if(live.length>bld.length)return{w:'saboteurs',why:'outnumber'};return null}
 const nextLabel=()=>{const G=g();if(check()||G.i+1>=Q.length)return'See results';return G.phase==='rev'&&(G.i+1)%EVERY===0?'Emergency meeting 🚨':'Next question'};
-function next(){const G=g(),ph=G.phase;flush();const f=check();if(f)return finish(f.w,f.why);
+function next(){const G=g(),ph=G.phase;ET.cp('next');flush();const f=check();if(f)return finish(f.w,f.why);
  if(G.i+1>=Q.length)return finish('builders','done');
  if(ph==='rev'&&(G.i+1)%EVERY===0)return meeting();nextQ()}
 
@@ -251,7 +251,7 @@ function upd(){const c=$('#cnt');if(!c)return;const G=g(),ph=G.phase;let a=ACT()
  else if(ph==='q'){n=a.filter(p=>p.a).length;t=`${n} of ${a.length} have answered`}
  else if(ph==='vote'){a=voters();n=a.filter(p=>p.vk!=null).length;t=`${n} of ${a.length} votes locked in`}
  c.textContent=t;const b=$('#cbar');if(b)b.style.width=(a.length?n/a.length*100:0)+'%'}
-function build(){const G=g();if(G.phase!=='roles')return;nextQ()}
+function build(){const G=g();if(G.phase!=='roles')return;ET.cp('build');nextQ()}
 
 /* ---- exports (CSV text is neutralised so a name starting with = can't run as a formula) ---- */
 const cell=v=>{let s=String(v);if(typeof v==='string'&&/^[=+\-@]/.test(s))s="'"+s;return `"${s.replace(/"/g,'""')}"`};
@@ -382,5 +382,9 @@ function endV(d){const w=TH[d.th]||w_();R.th=d.th;
   <p>The ${w.sabs.toLowerCase()} were: <b>${d.sabs.map(s=>s.name).join(', ')||'nobody'}</b></p><p class="bal">⭐ ${d.pts}</p><p>Great playing, ${ET.S().name}!</p>`);
  good();setTimeout(()=>beep(1100,.4),300)}
 
-ET.eng.saboteur={start,join,drop,host,student};
+/* resume: rebuild the board, re-sync the id counters, then carry on from the saved point ('build' = roles dealt, otherwise the next question or meeting) */
+function resume(fn){const G=g();clearInterval(G.tm);
+ P().forEach(p=>{const m=/^c(\d+)$/.exec(p.pub||'');if(m)CN=Math.max(CN,+m[1]);const b=/^bot(\d+)$/.exec(p.id);if(b)BC=Math.max(BC,+b[1]);ensure(p)});
+ $('#pv').innerHTML='<div class="sb-board"><div id="sbtop"></div><div id="sbmain"></div></div>';top();fn==='build'?build():next()}
+ET.eng.saboteur={start,join,drop,host,student,resume};
 })();

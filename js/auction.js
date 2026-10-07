@@ -85,7 +85,7 @@ function lock(p,w,dd,ins){const G=g();if(p.locked)return;
  p.dd=!!dd&&!p.ddUsed;p.ins=!!ins&&!p.insUsed;if(p.dd)p.ddUsed=true;if(p.ins)p.insUsed=true;p.w=w;p.locked=true}
 
 /* round flow */
-function next(){const G=g();G.i++;if(G.i>=Q.length)return finish();
+function next(){const G=g();ET.cp('next');G.i++;if(G.i>=Q.length)return finish();
  clearInterval(G.tm);G.fin=G.i===Q.length-1;G.phase='topic';
  P().forEach(p=>{p.w=null;p.locked=false;p.ans=null;p.dd=p.ins=false;p.rev=null;p.mercy=0;
   if(G.i>0&&p.bal<=20){p.bal+=50;p.mercy=50;G.mercies++}}); /* Charity Bid: nobody is out */
@@ -167,6 +167,8 @@ function csv(){const G=g(),k=Object.keys(G.log[0]||{playerId:1});dl('auction-ans
 function json(){const G=g();dl('auction-session.json','application/json',JSON.stringify({mode:'auction',topic:G.topic,year:$('#yr').value,secondsPerQuestion:G.sec,startingCoins:500,
  questions:Q,players:P().map(p=>({playerId:p.id,name:p.name,avatarId:p.av+1,finalCoins:p.bal,badge:BADGE[p.badge||badgeKey(p)].n})),log:G.log,perQuestion:G.dist,charityBids:G.mercies},null,1))}
 
+/* resume: the host board is rebuilt, then the lot after the last finished one starts from the top */
+function resume(){board();next()}
 window.AU={next,close:closeBids,reveal,more,stop,again:start,csv,json};
 
 /* ================= STUDENT ================= */
@@ -237,7 +239,7 @@ function revV(d){
   ${d.streak>=3?`<p class="big">🔥 ${d.streak} in a row!</p>`:''}
   <p style="font-size:20px"><b>Answer: ${E(d.correct)}</b></p><p>${E(d.exp)}</p><p>Watch the main screen.</p>`)}
 
-ET.eng.auction={start,join,drop,host,student};
+ET.eng.auction={start,join,drop,host,student,resume};
 
 /* host setup: the pass threshold only matters for Waka */
 document.querySelectorAll('#mm .mode').forEach(b=>b.addEventListener('click',()=>{const t=$('#th');if(t)t.parentNode.style.display=b.dataset.m==='auction'?'none':''}));
